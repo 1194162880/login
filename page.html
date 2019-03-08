@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="./css/1.css">
+</head>
+<body>
+    <div class="header">
+        <img src="./img/picture.gif" alt="picture" class="showimg">
+        DUYI
+    </div>
+    <ul class="left-choose">
+        <span>学生管理</span>
+        <li class="list">☆学生列表</li>
+        <li class="addstu">☆新增学生</li>
+    </ul>
+    <div id="main">
+        <table class="tablelist" border="1">
+            <thead>
+                <tr>
+                    <th>学号</th>
+                    <th>姓名</th>
+                    <th>性别</th>
+                    <th>邮箱</th>
+                    <th>年龄</th>
+                    <th>手机号</th>
+                    <th>住址</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody class="tb"></tbody>
+        </table>
+        <div class="newadd">
+            <form id="formlist">
+            学号：<input type="text" name="sid" class="sid"><br>
+            姓名：<input type="text" name="uname"><br>
+            性别：<input type="radio" name="sex" value="m">男
+            <input type="radio" name="sex" value="f">女<br>
+            邮箱：<input type="text" name="mail"><br>
+            年龄：<input type="text" name="age"><br>
+            手机：<input type="text" name="phone"><br>
+            地址：<input type="text" name="addr"><br>
+                <button class="submit">提交</button>
+                <button class="reset">重置</button>
+                </form>
+        </div>
+    </div>
+    <div class="modal"><!--半透明遮罩层-->
+            <div class="modal-dialog"><!--宽度+定位-->
+                <div class="modal-content">
+                    <h4>编辑学生信息</h4>
+                    <p class="msg"></p>
+                    <form id="modal-inp">
+                        学号：<input type="text" name="sid" id="sid"><br>
+                        姓名：<input type="text" name="uname" id="uname"><br>
+                        性别：<input type="radio" name="sex" value="m">男
+                        <input type="radio" name="sex" value="f">女<br>
+                        邮箱：<input type="text" name="mail" id="mail"><br>
+                        年龄：<input type="text" name="age" id="age"><br>
+                        手机：<input type="text" name="phone" id="phone"><br>
+                        地址：<input type="text" name="addr" id="addr"><br>
+                    </form>
+                    <input type="button" value="提交" id="btsubmit">
+                    <input type="button" value="重置" id="btclear">
+                    <input type="button" value="关闭" id="close">
+                </div>
+            </div>  
+        </div>
+
+    <script src="jquery-1.11.3.js"></script>
+    <script>
+    $(".list").css('background','gray');//默认学生列表颜色
+        $('.tb').load('select.php',function (data,msg,xhr) {
+            $(".tb").html(data).show();
+        })
+        //点击学生列表
+        $(".list").click(function() {
+            $(".addstu").css('background','');
+            $(this).css('background','gray');
+            $(".tablelist").show();
+            $("#formlist").hide();
+            $('.tb').load('select.php',function (data,msg,xhr) {
+            $(".tb").html(data).show();
+            })
+        })
+        //点击新增学生
+        $(".addstu").click(function() {
+            $(".tablelist").hide();
+            $("#formlist").show();
+            $(".list").css('background','');
+            $(this).css('background','gray');
+        })
+        //点击提交
+        $(".submit").click (function() {
+            var result=$("#formlist").serialize();
+            console.log(result);
+            $.post('submit.php',result,function(data) {
+                alert(data);
+            })
+            $('input').val("");
+        })
+        //点击重置
+        $(".reset").click(function() {
+            $('input').val("");
+        })
+        //点击删除
+        $(".tb").delegate('#del','click',function() {
+            var like = window.confirm("确定删除吗？");
+            if(like==true) {
+                var sid = $(this).parent().siblings('.sid').text();
+            // console.log(sid);
+            $(this).parent().parent().remove();
+            $.post('delete.php',{'sid': sid},function () {
+                alert('删除成功');
+            })
+            }else {
+
+            }
+            
+
+        })
+        //点击编辑
+        var regi = $(".tb").delegate("#edi",'click',function() {
+            $(".modal").fadeIn();
+            $('#sid').val($(this).parent().siblings('.sid').text());
+            $('#uname').val($(this).parent().siblings('.uname').text());
+            $('#mail').val($(this).parent().siblings('.mail').text());
+            $('#age').val($(this).parent().siblings('.age').text());
+            $('#phone').val($(this).parent().siblings('.phone').text());
+            $('#addr').val($(this).parent().siblings('.addr').text());
+            console.log($('#modal-inp [name=sex]'));
+            console.log($(this).parent().siblings('.sex').text());
+            if($(this).parent().siblings('.sex').text()== 'm') {
+                $('#modal-inp [name=sex]:eq(0)').attr('checked','checked');
+            }else{
+                $('#modal-inp [name=sex]:eq(1)').attr('checked','checked');
+            }
+        })
+        $('#btclear').click(function () {
+            $('#modal-inp input').val('');
+        })
+        //遮罩层点击关闭
+        $("#close").click(function() {
+            $(".modal").fadeOut();
+        })
+        //遮罩层点击提交按钮
+        $("#btsubmit").click(function() {
+            var result = $("#modal-inp").serialize();
+            console.log(result);
+            $.post('change.php',result,function () {
+                $(".modal").fadeOut();
+                $('.tb').load('select.php',function (data,msg,xhr) {
+            $(".tb").html(data).show();
+            })
+            })
+        })
+        //正则匹配
+        
+        </script>
+</body>
+</html>
